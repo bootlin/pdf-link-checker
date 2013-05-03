@@ -45,8 +45,6 @@ TODO
 
 *(...because there's no active project without a TODO list!)*
 
-* Fix: Make it understand mailto links (such as mailto:foo@domain.com').
-
 * Fix: some documents are failing on doc.initialize().
 
 * Fix: ugly timeouts encountered when running the script.
@@ -58,6 +56,10 @@ TODO
 
 Version History
 ===============
+
+1.0.3
+  * Understand 'mailto' URIs
+  * Add better exception handling to avoid crashing
 
 1.0.2
   * Updated repo location

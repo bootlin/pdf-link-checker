@@ -232,6 +232,12 @@ def e(s):
     return ESC_PAT.sub(lambda m: '&#%d;' % ord(m.group(0)), s)
 
 
+def is_valid(url):
+    if url.startswith('mailto'):
+        return False
+    return True
+
+
 def search_url_string(obj):
     if isinstance(obj, str):
         return e(obj)
@@ -251,7 +257,7 @@ def search_url(obj, urls):
                 # Need to unescape html special characters
                 parser = HTMLParser()
                 url = parser.unescape(url)
-                if url is not None:
+                if url is not None and is_valid(url):
                     log.debug('URL found: {}'.format(url))
                     urls.add(url)
 
