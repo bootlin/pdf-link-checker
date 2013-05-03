@@ -47,7 +47,8 @@ TODO
 
 * Fix: some documents are failing on doc.initialize().
 
-* Fix: ugly timeouts encountered when running the script.
+* Fix: if the URL is a huge document, we should just check and not
+  download it entirely.
 
 * Replace the thread array into a nice thread pool.
   Each thread from the pool should take an URL from a (protected) queue.
@@ -58,7 +59,8 @@ Version History
 ===============
 
 1.0.3
-  * Understand 'mailto' URIs
+  * Only allow https and ftp URIs. This prevents from failing on mailto:
+    and file:// URIs.
   * Add better exception handling to avoid crashing
 
 1.0.2

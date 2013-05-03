@@ -318,7 +318,7 @@ def main():
     usage = 'usage: %prog [options] [PDF document files]'
     description = 'Reports broken hyperlinks in PDF documents'
 
-    optparser = OptionParser(usage=usage, version='1.0.2',
+    optparser = OptionParser(usage=usage, version='1.0.3',
                              description=description)
 
     optparser.add_option('-v', '--verbose',

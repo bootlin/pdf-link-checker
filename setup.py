@@ -15,7 +15,7 @@ from setuptools import setup
 
 setup(
     name='pdf-link-checker',
-    version='1.0.2',
+    version='1.0.3',
     description='Reports broken hyperlinks in PDF documents',
     long_description=open('README.rst').read(),
 
