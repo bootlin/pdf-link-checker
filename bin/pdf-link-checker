@@ -280,9 +280,9 @@ def extract_urls(filename, urls):
     fp = file(filename, 'rb')
     parser = PDFParser(fp)
     parser.set_document(doc)
-    doc.set_parser(parser)
 
     try:
+        doc.set_parser(parser)
         doc.initialize()
     except:
         # TODO: Catch the proper exception
@@ -297,7 +297,7 @@ def extract_urls(filename, urls):
                 obj = doc.getobj(objid)
                 search_url(obj, urls)
             except:
-                raise
+                continue
 
     fp.close()
     return
