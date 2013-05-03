@@ -33,6 +33,13 @@ Options
   to the number of requests per host.
   Otherwise, some hosts may confuse the check with a DoS attack.
 
+Getting help
+============
+
+You can post your questions to our dedicated mailing list:
+
+  http://lists.free-electrons.com/mailman/listinfo/pdf-link-checker-updates
+
 TODO
 ====
 
@@ -44,9 +51,6 @@ TODO
 
 * Fix: ugly timeouts encountered when running the script.
 
-* Move from distutils to distribute to have automatic
-  dependency resolution when installing the package.
-
 * Replace the thread array into a nice thread pool.
   Each thread from the pool should take an URL from a (protected) queue.
   We could also have one queue per host and thus handle the
@@ -54,6 +58,10 @@ TODO
 
 Version History
 ===============
+
+1.0.2
+  * Updated repo location
+  * Moved from distutils to setuptools
 
 1.0.1
   * Version bump

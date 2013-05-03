@@ -11,17 +11,19 @@ Required packages:
                   # in CJK (Chinese, Japanese, Korean) languages.
 """
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='pdf-link-checker',
-    version='1.0.1',
+    version='1.0.2',
     description='Reports broken hyperlinks in PDF documents',
     long_description=open('README.rst').read(),
+
     author='Ezequiel Garcia',
     author_email='ezequiel.garcia@free-electrons.com',
     license='GPL-2',
-    url='http://git.free-electrons.com/training-scripts',
-    scripts=["bin/pdf-link-checker"],
-    requires=['pdfminer'],
+
+    url='http://git.free-electrons.com/pdf-link-checker',
+    scripts=['bin/pdf-link-checker'],
+    install_requires=['pdfminer'],
 )
