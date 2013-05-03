@@ -233,9 +233,10 @@ def e(s):
 
 
 def is_valid(url):
-    if url.startswith('mailto'):
-        return False
-    return True
+    # Include http/https/ftp are the only URLs supported
+    if url.startswith('http') or url.startswith('ftp'):
+        return True
+    return False
 
 
 def search_url_string(obj):
