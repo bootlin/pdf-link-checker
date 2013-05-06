@@ -258,8 +258,9 @@ def e(s):
 
 
 def is_valid(url):
-    # Include http/https/ftp are the only URLs supported
-    if url.startswith('http') or url.startswith('ftp'):
+    # Currently http/https/ftp are the only URLs supported
+    protocol = urlparse.urlparse(url)[0]
+    if protocol == 'http' or protocol == 'https' or protocol == 'ftp':
         return True
     return False
 
