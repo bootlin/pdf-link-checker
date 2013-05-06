@@ -58,10 +58,14 @@ TODO
 Version History
 ===============
 
-1.0.3
+1.1.0
   * Only allow https and ftp URIs. This prevents from failing on mailto:
     and file:// URIs.
   * Add better exception handling to avoid crashing
+  * Add better timeout and request exception handling
+  * Fix broken thread management
+  * Remove stupid double-requests
+  * Several small fixes
 
 1.0.2
   * Updated repo location
