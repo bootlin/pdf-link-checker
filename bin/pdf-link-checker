@@ -48,6 +48,7 @@ import os
 import re
 import sys
 import time
+import socket
 import threading
 import logging as log
 import httplib
@@ -111,6 +112,8 @@ def check_http_url(url):
     except urllib2.URLError, why:
         return (False, why)
     except httplib.BadStatusLine, why:
+        return (False, why)
+    except socket.timeout, why:
         return (False, why)
     except:
         return (False, 'unknown')
