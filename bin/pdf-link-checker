@@ -170,6 +170,8 @@ def check_url(url):
             if fixed == url:
                 break
             log.debug('Trying with fixed link: {}'.format(url))
+        else:
+            break
 
     log.debug('Done checking link {}'.format(url))
     return res
