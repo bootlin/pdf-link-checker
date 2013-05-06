@@ -153,13 +153,6 @@ def check_url(url):
             res = check_http_url(url)
         elif protocol == 'ftp':
             res = check_ftp_url(url)
-        else:
-            # Still try to handle other protocols
-            try:
-                urllib2.urlopen(url)
-                res = (True, None)
-            except:
-                res = (False, 'Unknown - Please report this bug!')
 
         # If we get a False result,
         # we'll try (the first time) with a 'fixed' url
