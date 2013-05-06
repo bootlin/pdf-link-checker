@@ -147,7 +147,7 @@ def check_url(url):
     # I **think** PDF also has 'internal links',
     # should we check for those?
 
-    for i in range(0,2):
+    for i in range(2):
 
         if protocol == 'http' or protocol == 'https':
             res = check_http_url(url)
