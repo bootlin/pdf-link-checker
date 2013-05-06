@@ -355,7 +355,7 @@ def main():
 
     optparser.add_option('-t', '--max-threads',
                          action='store', type='int',
-                         dest='max_threads', default=100,
+                         dest='max_threads', default=20,
                          help='set the maximum number '
                          'of parallel threads to create')
 
