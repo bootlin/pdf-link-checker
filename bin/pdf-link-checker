@@ -164,7 +164,11 @@ def check_url(url):
         # If we get a False result,
         # we'll try (the first time) with a 'fixed' url
         if res[0] is False and i == 0:
-            url = url_fix(url)
+            fixed = url_fix(url)
+            # Only do the check with fixed url if it's different
+            # from the original one
+            if fixed == url:
+                break
             log.debug('Trying with fixed link: {}'.format(url))
 
     log.debug('Done checking link {}'.format(url))
