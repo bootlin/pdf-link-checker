@@ -94,7 +94,7 @@ def url_fix(s, charset='utf-8'):
 # URL checking
 ##########################################################
 
-def check_http_url(url):
+def check_http_url(url, timeout):
 
     request = urllib2.Request(url)
     opener = urllib2.build_opener()
@@ -106,7 +106,7 @@ def check_http_url(url):
                        'rv \u2014 1.7.8) Gecko/20050511')
 
     try:
-        opener.open(request).read()
+        opener.open(request, None, timeout).read()
     except urllib2.HTTPError, why:
         return (False, why)
     except urllib2.URLError, why:
@@ -142,7 +142,7 @@ def check_ftp_url(url):
     return (True, None)
 
 
-def check_url(url):
+def check_url(url, timeout):
 
     log.debug('Checking link: {}'.format(url))
 
@@ -155,7 +155,7 @@ def check_url(url):
     for i in range(2):
 
         if protocol == 'http' or protocol == 'https':
-            res = check_http_url(url)
+            res = check_http_url(url, timeout)
         elif protocol == 'ftp':
             res = check_ftp_url(url)
 
@@ -186,7 +186,8 @@ def url_is_ignored(url, exclude_hosts):
     return exclude_hosts.count(hostname)
 
 
-def check_url_threaded(url, hostname, errors, lock, tokens_per_host, max_req_per_host):
+def check_url_threaded(url, hostname, errors, lock, tokens_per_host,
+                       max_req_per_host, timeout):
 
     # Check that we don't run too many parallel checks per host
     # That could bring the host down or at least be considered
@@ -209,10 +210,11 @@ def check_url_threaded(url, hostname, errors, lock, tokens_per_host, max_req_per
                 if tokens_per_host[hostname] > 0:
                     tokens_per_host[hostname] -= 1
                     break
+            print('waiting to check ' + url)
             time.sleep(1)
 
     # Do the URL check!
-    res, reason = check_url(url)
+    res, reason = check_url(url, timeout)
     if res is False:
         with lock:
             errors.append((url, reason))
@@ -223,7 +225,7 @@ def check_url_threaded(url, hostname, errors, lock, tokens_per_host, max_req_per
 
 
 def do_work(urls, errors, lock, tokens_per_host, max_req_per_host,
-            exclude_hosts):
+            exclude_hosts, timeout):
 
     while True:
 
@@ -241,7 +243,7 @@ def do_work(urls, errors, lock, tokens_per_host, max_req_per_host,
 
         # Ok, we have a non-excluded URL: check it!
         check_url_threaded(url, hostname, errors, lock, tokens_per_host,
-                           max_req_per_host)
+                           max_req_per_host, timeout)
 
 
 ##########################################################
@@ -376,6 +378,11 @@ def main():
                          help='ignore urls which host name '
                          'belongs to the given list')
 
+    optparser.add_option('-m', '--timeout',
+                         action='store', type='int',
+                         dest='timeout', default=5,
+                         help='set the timeout for the requests')
+
     optparser.add_option('', '--check-url',
                          action='store', type='string',
                          dest='check_url', default='',
@@ -399,7 +406,7 @@ def main():
     # a false-positive invalid URL
     if len(options.check_url) != 0:
         url = options.check_url
-        res, reason = check_url(url)
+        res, reason = check_url(url, options.timeout)
         if res is False:
             log.error('URL {} failed. Reason: {}'.format(url, reason))
         sys.exit()
@@ -429,7 +436,7 @@ def main():
         t = threading.Thread(target=do_work,
                              args=(urls, errors, lock,
                              tokens_per_host, options.max_requests_per_host,
-                             options.exclude_hosts))
+                             options.exclude_hosts, options.timeout))
         t.start()
 
     # Wait for all threads to complete
