@@ -188,14 +188,11 @@ def url_is_ignored(url, exclude_hosts):
     return exclude_hosts.count(hostname)
 
 
-def check_url_threaded(url, errors, lock, tokens_per_host, max_req_per_host):
+def check_url_threaded(url, hostname, errors, lock, tokens_per_host, max_req_per_host):
 
     # Check that we don't run too many parallel checks per host
     # That could bring the host down or at least be considered
     # as the Denial of Service attack.
-
-    hostname = get_hostname(url)
-
     log.info('Checking hyperlink: {}'.format(url))
 
     # Counting parallel requests to the same host.
@@ -225,6 +222,28 @@ def check_url_threaded(url, errors, lock, tokens_per_host, max_req_per_host):
     if hostname != '':
         with lock:
             tokens_per_host[hostname] += 1
+
+
+def do_work(urls, errors, lock, tokens_per_host, max_req_per_host,
+            exclude_hosts):
+
+    while True:
+
+        # Take one URL to check
+        with lock:
+            # Terminate the thread is the URL list is empty
+            if len(urls) == 0:
+                return
+            url = urls.pop()
+
+        # Verify the host is not excluded
+        hostname = get_hostname(url)
+        if exclude_hosts.count(hostname):
+            continue
+
+        # Ok, we have a non-excluded URL: check it!
+        check_url_threaded(url, hostname, errors, lock, tokens_per_host,
+                           max_req_per_host)
 
 
 ##########################################################
@@ -406,18 +425,12 @@ def main():
     tokens_per_host = {}
     errors = []
     lock = threading.Lock()
-    for url in urls:
+    for i in range(options.max_threads):
 
-        if url_is_ignored(url, options.exclude_hosts):
-            continue
-
-        # Do not exceed the max number of threads
-        while threading.active_count() - 1 > options.max_threads:
-            time.sleep(1)
-
-        t = threading.Thread(target=check_url_threaded,
-                             args=(url, errors, lock,
-                             tokens_per_host, options.max_requests_per_host))
+        t = threading.Thread(target=do_work,
+                             args=(urls, errors, lock,
+                             tokens_per_host, options.max_requests_per_host,
+                             options.exclude_hosts))
         t.start()
 
     # Wait for all threads to complete
