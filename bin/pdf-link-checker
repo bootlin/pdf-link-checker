@@ -112,6 +112,8 @@ def check_http_url(url):
         return (False, why)
     except httplib.BadStatusLine, why:
         return (False, why)
+    except:
+        return (False, 'unknown')
     return (True, None)
 
 
