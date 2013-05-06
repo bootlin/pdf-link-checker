@@ -20,7 +20,7 @@ Options
 
   Specifies the maximum number of allowed threads (default: 100).
 
-  To speedup the run, pdf-linkchecker will launch several threads
+  To speedup the run, pdf-link-checker will launch several threads
   in order to check several links in parallel.
   This option allows to set a limit to the number of threads.
 
