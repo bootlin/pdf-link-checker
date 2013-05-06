@@ -58,6 +58,9 @@ TODO
 Version History
 ===============
 
+1.1.1
+  * Remove extra print, just a leftover
+
 1.1.0
   * Only allow https and ftp URIs. This prevents from failing on mailto:
     and file:// URIs.
