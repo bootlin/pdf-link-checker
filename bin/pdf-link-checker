@@ -15,6 +15,7 @@
 #   URL checking based on 'coool' script
 #   Copyright (C) 2005-2013 Free Electrons
 #   Author: Michael Opdenacker <michael at free-electrons com>
+#   http://git.free-electrons.com/training-scripts/tree/odf/coool
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
