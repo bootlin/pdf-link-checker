@@ -144,8 +144,8 @@ def check_url(url, timeout):
     protocol = urlparse.urlparse(url)[0]
 
     # TODO:
-    # I **think** PDF also has 'internal links',
-    # should we check for those?
+    # PDF also has 'internal links',
+    # We should check them too
 
     for i in range(2):
 
