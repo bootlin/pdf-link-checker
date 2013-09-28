@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #
-# url_cop: URLs checking on PDF documents
-# Reports broken hyperlinks in PDF documents
+# pdf-link-checker: report broken hyperlinks in PDF documents
 #
 # About page: http://free-electrons.com/blog/pdf-link-checker
 # Downloads page: http://git.free-electrons.com/pdf-link-checker
@@ -66,8 +65,9 @@ def touch(fname):
     else:
         open(fname, 'w').close()
 
+SLASHDRV_PAT = re.compile('^/([A-Z]:)')
 
-def url_fix(s, charset='utf-8'):
+def url_fix(url, charset='utf-8'):
     # This snippet idea has been taken from 'Werkzeug' project.
     # See: http://werkzeug.pocoo.org/
     #
@@ -76,11 +76,27 @@ def url_fix(s, charset='utf-8'):
     # This function can fix some of the problems in a similar way browsers
     # handle data entered by the user.
 
-    if isinstance(s, unicode):
-        s = s.encode(charset, 'ignore')
-    scheme, netloc, path, qs, anchor = urlparse.urlsplit(s)
-    path = urllib.quote(path, '/%')
-    qs = urllib.quote_plus(qs, ':&=')
+    # Another thing we want to do is rewrite Windows file URLs
+    # that urllib2 won't know how to handle otherwise.
+
+    if isinstance(url, unicode):
+        url = url.encode(charset, 'ignore')
+
+    scheme, netloc, path, qs, anchor = urlparse.urlsplit(url)
+
+    if scheme == 'file':
+        if netloc:
+           if netloc != 'localhost':
+               #log.debug('Hostname ' + str(netloc) + ' for ' + str(url))
+               path = '//' + netloc + path
+               netloc = 'localhost'
+        elif True:
+               path = SLASHDRV_PAT.sub('\\1', path);
+               #log.debug('New path: ' + path + ' for ' + str(url))
+    else:
+        path = urllib.quote(path, '/%')
+        qs = urllib.quote_plus(qs, ':&=')
+
     return urlparse.urlunsplit((scheme, netloc, path, qs, anchor))
 
 
@@ -91,7 +107,8 @@ def url_fix(s, charset='utf-8'):
 def check_http_url(url, timeout):
 
     request = urllib2.Request(url)
-    opener = urllib2.build_opener()
+    request.get_method = lambda : 'HEAD'
+
     # Add a browser-like User-Agent.
     # Some sites (like wikipedia) don't seem to accept requests
     # with the default urllib2 User-Agent
@@ -100,6 +117,7 @@ def check_http_url(url, timeout):
                        'rv \u2014 1.7.8) Gecko/20050511')
 
     try:
+        opener = urllib2.build_opener()
         opener.open(request, None, timeout).read()
     except urllib2.HTTPError, why:
         return (False, why)
@@ -135,33 +153,58 @@ def check_ftp_url(url):
             return (False, 'Non existing or empty file')
     return (True, None)
 
+def check_non_http_or_ftp_url(url):
+
+    request = urllib2.Request(url)
+    request.get_method = lambda : 'HEAD'
+
+    try:
+        response = urllib2.urlopen(request)
+        return (True, None)
+
+    except IOError, why:
+        if 'is a directory' in str(why).lower():
+            # returning a directory is perfectly fine
+            return (True, None)
+        log.debug('Cannot open file URL: {} '.format(why))
+        return (False, why)
+
 
 def check_url(url, timeout):
 
-    log.debug('Checking link: {}'.format(url))
-
     protocol = urlparse.urlparse(url)[0]
 
-    # TODO:
+    # TODO: support relative links;
     # PDF also has 'internal links',
-    # We should check them too
+    # we should check them, too.
+
+    log.debug('Checking link: {}'.format(url))
 
     for i in range(2):
+
+        res = [ True, 'skipped' ]
 
         if protocol == 'http' or protocol == 'https':
             res = check_http_url(url, timeout)
         elif protocol == 'ftp':
             res = check_ftp_url(url)
+        elif protocol:
+            res = check_non_http_or_ftp_url(url)
+        else:
+            # no protocol could be found, and we don't support relative links yet
+            log.debug('Skipping unsupported link {}'.format(url))
+            return (False, 'Relative')
 
         # If we get a False result,
-        # we'll try (the first time) with a 'fixed' url
+        # we'll retry (once) with a 'fixed' url
         if res[0] is False and i == 0:
             fixed = url_fix(url)
             # Only do the check with fixed url if it's different
             # from the original one
             if fixed == url:
                 break
-            log.debug('Trying with fixed link: {}'.format(url))
+            url = fixed
+            log.debug('Retrying as: {}'.format(url))
         else:
             break
 
@@ -174,37 +217,30 @@ def get_hostname(url):
     return urlparse.urlparse(url)[1]
 
 
-def url_is_ignored(url, exclude_hosts):
-
-    hostname = get_hostname(url)
-    return exclude_hosts.count(hostname)
-
-
-def check_url_threaded(url, hostname, errors, lock, tokens_per_host,
+def check_url_threaded(url, errors, lock, tokens_per_host,
                        max_req_per_host, timeout):
 
     # Check that we don't run too many parallel checks per host
     # That could bring the host down or at least be considered
     # as the Denial of Service attack.
-    log.info('Checking hyperlink: {}'.format(url))
 
     # Counting parallel requests to the same host.
-    # Of course, ignore local links
 
-    if hostname != '':
+    # dictionaries are thread-safe,
+    # but it's best to put a lock here anyway
 
-        # dictionaries are thread-safe,
-        # but it's best to put a lock here anyway
+    hostname = get_hostname(url)
+
+    with lock:
+        if hostname not in tokens_per_host:
+            tokens_per_host[hostname] = max_req_per_host
+
+    while True:
         with lock:
-            if hostname not in tokens_per_host:
-                tokens_per_host[hostname] = max_req_per_host
-
-        while True:
-            with lock:
-                if tokens_per_host[hostname] > 0:
-                    tokens_per_host[hostname] -= 1
-                    break
-            time.sleep(1)
+            if tokens_per_host[hostname] > 0:
+                tokens_per_host[hostname] -= 1
+                break
+        time.sleep(1)
 
     # Do the URL check!
     res, reason = check_url(url, timeout)
@@ -212,13 +248,12 @@ def check_url_threaded(url, hostname, errors, lock, tokens_per_host,
         with lock:
             errors.append((url, reason))
 
-    if hostname != '':
-        with lock:
-            tokens_per_host[hostname] += 1
+    with lock:
+        tokens_per_host[hostname] += 1
 
 
 def do_work(urls, errors, lock, tokens_per_host, max_req_per_host,
-            exclude_hosts, timeout):
+            timeout):
 
     while True:
 
@@ -229,13 +264,8 @@ def do_work(urls, errors, lock, tokens_per_host, max_req_per_host,
                 return
             url = urls.pop()
 
-        # Verify the host is not excluded
-        hostname = get_hostname(url)
-        if exclude_hosts.count(hostname):
-            continue
-
         # Ok, we have a non-excluded URL: check it!
-        check_url_threaded(url, hostname, errors, lock, tokens_per_host,
+        check_url_threaded(url, errors, lock, tokens_per_host,
                            max_req_per_host, timeout)
 
 
@@ -249,14 +279,11 @@ ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
 def e(s):
     return ESC_PAT.sub(lambda m: '&#%d;' % ord(m.group(0)), s)
 
-
 def is_valid(url):
-    # Currently http/https/ftp are the only URLs supported
+    # we require that a protocol is given (i.e. the URL is absolute)
+    # but we've only tested with http, https, ftp and file URLs
     protocol = urlparse.urlparse(url)[0]
-    if protocol == 'http' or protocol == 'https' or protocol == 'ftp':
-        return True
-    return False
-
+    return protocol
 
 def search_url_string(obj):
     if isinstance(obj, str):
@@ -370,10 +397,17 @@ def main():
                          help='ignore urls which host name '
                          'belongs to the given list')
 
+    optparser.add_option('-p', '--include-pattern',
+                         action='store', type='string',
+                         dest='include_pattern', default='',
+                         help='include only urls that match '
+                         'the given regular expression')
+
     optparser.add_option('-m', '--timeout',
                          action='store', type='int',
                          dest='timeout', default=5,
-                         help='set the timeout for the requests')
+                         help='set the timeout for the requests '
+                         '(only used with HTTP(S))')
 
     optparser.add_option('', '--check-url',
                          action='store', type='string',
@@ -419,6 +453,33 @@ def main():
         log.warning('No URLs found! Exiting.')
         sys.exit()
 
+    # Filter URLs by -p option (if given)
+
+    if options.include_pattern:
+
+        try:
+           p = re.compile(options.include_pattern)
+           urls = [url for url in urls if p.search(url) ]
+
+        except:
+           log.critical('The -p argument value is not a valid regular expression. Exiting.')
+           sys.exit()
+
+        if len(urls) == 0:
+           log.warning('No URLs left after -p! Exiting.')
+           sys.exit()
+
+    # Filter URLs by -x option (if given)
+
+    if len(options.exclude_hosts) > 0:
+
+        urls = [url for url in urls
+                    if not exclude_hosts.count(get_hostname(url))]
+
+        if len(urls) == 0:
+           log.warning('No URLs left after -x! Exiting.')
+           sys.exit()
+
     # Run URL checks
     tokens_per_host = {}
     errors = []
@@ -428,7 +489,7 @@ def main():
         t = threading.Thread(target=do_work,
                              args=(urls, errors, lock,
                              tokens_per_host, options.max_requests_per_host,
-                             options.exclude_hosts, options.timeout))
+                             options.timeout))
         t.start()
 
     # Wait for all threads to complete
