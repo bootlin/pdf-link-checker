@@ -8,7 +8,7 @@
 # Recommended packages: pdfminer-data (encoding data needed to read
 # some PDF documents in CJK (Chinese, Japanese, Korean) languages.
 #
-# Copyright (C) 2012-2013 Free Electrons
+# Copyright (C) 2012-2016 Free Electrons
 # Author: Ezequiel Garcia <ezequiel.garcia at free-electrons com>
 #
 #   URL checking based on 'coool' script

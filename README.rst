@@ -58,6 +58,9 @@ TODO
 Version History
 ===============
 
+1.2.0
+  * Repair breakage against newer versions of pdfminer
+
 1.1.1
   * Remove extra print, just a leftover
 
