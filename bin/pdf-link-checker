@@ -469,7 +469,7 @@ def main():
     if len(options.exclude_hosts) > 0:
 
         urls = [url for url in urls
-                    if not exclude_hosts.count(get_hostname(url))]
+                    if not options.exclude_hosts.count(get_hostname(url))]
 
         if len(urls) == 0:
            log.warning('No URLs left after -x! Exiting.')
