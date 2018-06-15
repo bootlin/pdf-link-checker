@@ -166,6 +166,9 @@ def check_non_http_or_ftp_url(url):
         if 'is a directory' in str(why).lower():
             # returning a directory is perfectly fine
             return (True, None)
+        elif 'mailto' in str(why).lower():
+            # link to an e-mail address
+            return (True, None)
         log.debug('Cannot open file URL: {} '.format(why))
         return (False, why)
 
