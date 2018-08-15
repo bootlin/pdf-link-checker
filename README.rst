@@ -38,7 +38,7 @@ Getting help
 
 You can post your questions to our dedicated mailing list:
 
-  http://lists.free-electrons.com/mailman/listinfo/pdf-link-checker-updates
+  http://lists.bootlin.com/mailman/listinfo/pdf-link-checker-updates
 
 TODO
 ====

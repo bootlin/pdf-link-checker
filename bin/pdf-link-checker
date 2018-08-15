@@ -2,19 +2,19 @@
 #
 # pdf-link-checker: report broken hyperlinks in PDF documents
 #
-# About page: http://free-electrons.com/blog/pdf-link-checker
-# Downloads page: http://git.free-electrons.com/pdf-link-checker
+# About page: http://bootlin.com/blog/pdf-link-checker
+# Downloads page: http://git.bootlin.com/pdf-link-checker
 # Required packages: python-pdfminer
 # Recommended packages: pdfminer-data (encoding data needed to read
 # some PDF documents in CJK (Chinese, Japanese, Korean) languages.
 #
-# Copyright (C) 2012-2016 Free Electrons
-# Author: Ezequiel Garcia <ezequiel.garcia at free-electrons com>
+# Copyright (C) 2012-2016 Bootlin
+# Author: Ezequiel Garcia <ezequiel.garcia at bootlin com>
 #
 #   URL checking based on 'coool' script
-#   Copyright (C) 2005-2013 Free Electrons
-#   Author: Michael Opdenacker <michael at free-electrons com>
-#   http://git.free-electrons.com/training-scripts/tree/odf/coool
+#   Copyright (C) 2005-2013 Bootlin
+#   Author: Michael Opdenacker <michael at bootlin com>
+#   http://git.bootlin.com/training-scripts/tree/odf/coool
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the

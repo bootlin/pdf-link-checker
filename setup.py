@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright 2013 Free Electrons
+# Copyright 2013 Bootlin
 
 #
 """Build tar.gz for pdf-link-checker
@@ -20,10 +20,10 @@ setup(
     long_description=open('README.rst').read(),
 
     author='Ezequiel Garcia',
-    author_email='ezequiel.garcia@free-electrons.com',
+    author_email='ezequiel.garcia@bootlin.com',
     license='GPL-2',
 
-    url='http://git.free-electrons.com/pdf-link-checker',
+    url='http://git.bootlin.com/pdf-link-checker',
     scripts=['bin/pdf-link-checker'],
     install_requires=['pdfminer'],
 )
