@@ -66,7 +66,9 @@ def touch(fname):
     else:
         open(fname, 'w').close()
 
+
 SLASHDRV_PAT = re.compile('^/([A-Z]:)')
+
 
 def url_fix(url, charset='utf-8'):
     # This snippet idea has been taken from 'Werkzeug' project.
@@ -87,13 +89,13 @@ def url_fix(url, charset='utf-8'):
 
     if scheme == 'file':
         if netloc:
-           if netloc != 'localhost':
-               #log.debug('Hostname ' + str(netloc) + ' for ' + str(url))
-               path = '//' + netloc + path
-               netloc = 'localhost'
+            if netloc != 'localhost':
+                #log.debug('Hostname ' + str(netloc) + ' for ' + str(url))
+                path = '//' + netloc + path
+                netloc = 'localhost'
         elif True:
-               path = SLASHDRV_PAT.sub('\\1', path);
-               #log.debug('New path: ' + path + ' for ' + str(url))
+            path = SLASHDRV_PAT.sub('\\1', path)
+            #log.debug('New path: ' + path + ' for ' + str(url))
     else:
         path = urllib.quote(path, '/%')
         qs = urllib.quote_plus(qs, ':&=')
@@ -119,13 +121,13 @@ def check_http_url(url, timeout):
     try:
         opener = urllib2.build_opener()
         opener.open(request, None, timeout).read()
-    except urllib2.HTTPError, why:
+    except urllib2.HTTPError as why:
         return (False, why)
-    except urllib2.URLError, why:
+    except urllib2.URLError as why:
         return (False, why)
-    except httplib.BadStatusLine, why:
+    except httplib.BadStatusLine as why:
         return (False, why)
-    except socket.timeout, why:
+    except socket.timeout as why:
         return (False, why)
     except:
         return (False, 'unknown')
@@ -140,7 +142,7 @@ def check_ftp_url(url):
 
     try:
         tmpfile = urllib.urlretrieve(url)[0]
-    except IOError, why:
+    except IOError as why:
         return (False, why)
     else:
         # With a non-existing file on a ftp URL,
@@ -153,16 +155,17 @@ def check_ftp_url(url):
             return (False, 'Non existing or empty file')
     return (True, None)
 
+
 def check_non_http_or_ftp_url(url):
 
     request = urllib2.Request(url)
-    request.get_method = lambda : 'HEAD'
+    request.get_method = lambda: 'HEAD'
 
     try:
         response = urllib2.urlopen(request)
         return (True, None)
 
-    except IOError, why:
+    except IOError as why:
         if 'is a directory' in str(why).lower():
             # returning a directory is perfectly fine
             return (True, None)
@@ -185,7 +188,7 @@ def check_url(url, timeout):
 
     for i in range(2):
 
-        res = [ True, 'skipped' ]
+        res = [True, 'skipped']
 
         if protocol == 'http' or protocol == 'https':
             res = check_http_url(url, timeout)
@@ -194,7 +197,8 @@ def check_url(url, timeout):
         elif protocol:
             res = check_non_http_or_ftp_url(url)
         else:
-            # no protocol could be found, and we don't support relative links yet
+            # no protocol could be found, and we don't support
+            # relative links yet
             log.debug('Skipping unsupported link {}'.format(url))
             return (False, 'Relative')
 
@@ -282,11 +286,13 @@ ESC_PAT = re.compile(r'[\000-\037&<>()"\042\047\134\177-\377]')
 def e(s):
     return ESC_PAT.sub(lambda m: '&#%d;' % ord(m.group(0)), s)
 
+
 def is_valid(url):
     # we require that a protocol is given (i.e. the URL is absolute)
     # but we've only tested with http, https, ftp and file URLs
     protocol = urlparse.urlparse(url)[0]
     return protocol
+
 
 def search_url_string(obj):
     if isinstance(obj, str):
@@ -326,9 +332,9 @@ def extract_urls(filename, urls):
     log.info('Checking links in file {} ...'.format(filename))
 
     try:
-	fp = file(filename, 'rb')
-	parser = PDFParser(fp)
-	doc = PDFDocument(parser)
+        fp = file(filename, 'rb')
+        parser = PDFParser(fp)
+        doc = PDFDocument(parser)
     except:
         # TODO: Catch the proper exception
         #       and print some sane message
@@ -456,27 +462,27 @@ def main():
     if options.include_pattern:
 
         try:
-           p = re.compile(options.include_pattern)
-           urls = [url for url in urls if p.search(url) ]
+            p = re.compile(options.include_pattern)
+            urls = [url for url in urls if p.search(url)]
 
         except:
-           log.critical('The -p argument value is not a valid regular expression. Exiting.')
-           sys.exit()
+            log.critical('The -p argument value is not a valid regular expression. Exiting.')
+            sys.exit()
 
         if len(urls) == 0:
-           log.warning('No URLs left after -p! Exiting.')
-           sys.exit()
+            log.warning('No URLs left after -p! Exiting.')
+            sys.exit()
 
     # Filter URLs by -x option (if given)
 
     if len(options.exclude_hosts) > 0:
 
-        urls = [url for url in urls
-                    if not options.exclude_hosts.count(get_hostname(url))]
+        urls = [url for url in urls if not options.exclude_hosts.count(
+            get_hostname(url))]
 
         if len(urls) == 0:
-           log.warning('No URLs left after -x! Exiting.')
-           sys.exit()
+            log.warning('No URLs left after -x! Exiting.')
+            sys.exit()
 
     # Run URL checks
     tokens_per_host = {}
