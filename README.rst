@@ -36,9 +36,8 @@ Options
 Getting help
 ============
 
-You can post your questions to our dedicated mailing list:
-
-  http://lists.bootlin.com/mailman/listinfo/pdf-link-checker-updates
+You can get support by reporting your issue on this project
+on GitHub: https://github.com/bootlin/pdf-link-checker/issues
 
 TODO
 ====
