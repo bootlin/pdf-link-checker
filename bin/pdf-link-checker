@@ -335,10 +335,8 @@ def extract_urls(filename, urls):
         fp = file(filename, 'rb')
         parser = PDFParser(fp)
         doc = PDFDocument(parser)
-    except:
-        # TODO: Catch the proper exception
-        #       and print some sane message
-        log.error("Cannot open file {}\n".format(filename))
+    except Exception as e:
+        log.error("Cannot open file {}: {}\n".format(filename, e))
         return
 
     # Iterate through each object and search for URLs there
