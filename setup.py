@@ -23,7 +23,7 @@ setup(
     author_email='ezequiel.garcia@bootlin.com',
     license='GPL-2',
 
-    url='http://git.bootlin.com/pdf-link-checker',
+    url='https://github.com/bootlin/pdf-link-checker',
     scripts=['bin/pdf-link-checker'],
     install_requires=['pdfminer'],
 )
