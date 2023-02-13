@@ -78,7 +78,7 @@ def url_fix(url):
     # handle data entered by the user.
 
     # Another thing we want to do is rewrite Windows file URLs
-    # that urllib2 won't know how to handle otherwise.
+    # that urllib won't know how to handle otherwise.
 
     scheme, netloc, path, qs, anchor = urllib.parse.urlsplit(url)
 
@@ -108,7 +108,7 @@ def check_http_url(url, timeout):
 
     # Add a browser-like User-Agent.
     # Some sites (like wikipedia) don't seem to accept requests
-    # with the default urllib2 User-Agent
+    # with the default urllib User-Agent
     request.add_header('User-Agent',
                        'Mozilla/5.0 (X11; U; Linux i686; en-US;'
                        'rv 1.7.8) Gecko/20050511')
@@ -129,7 +129,7 @@ def check_http_url(url, timeout):
 
 
 def check_ftp_url(url):
-    # urllib2 doesn't raise any exception when a
+    # urllib doesn't raise any exception when a
     # ftp url for an invalid file is given
     # Only invalid domains are reported
     # That's why we are using urllib.urlretrieve
