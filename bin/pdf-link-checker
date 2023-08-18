@@ -166,7 +166,7 @@ def check_non_http_or_ftp_url(url):
         elif 'mailto' in str(why).lower():
             # link to an e-mail address
             return (True, None)
-        log.debug('Cannot open file URL: {} '.format(why))
+        log.debug('Cannot open file URL: %s ', why)
         return (False, why)
 
 
@@ -178,7 +178,7 @@ def check_url(url, timeout):
     # PDF also has 'internal links',
     # we should check them, too.
 
-    log.debug('Checking link: {}'.format(url))
+    log.debug('Checking link: %s', url)
 
     for i in range(2):
 
@@ -193,7 +193,7 @@ def check_url(url, timeout):
         else:
             # no protocol could be found, and we don't support
             # relative links yet
-            log.debug('Skipping unsupported link {}'.format(url))
+            log.debug('Skipping unsupported link %s', url)
             return (False, 'Relative')
 
         # If we get a False result,
@@ -205,11 +205,11 @@ def check_url(url, timeout):
             if fixed == url:
                 break
             url = fixed
-            log.debug('Retrying as: {}'.format(url))
+            log.debug('Retrying as: %s', url)
         else:
             break
 
-    log.debug('Done checking link {}'.format(url))
+    log.debug('Done checking link %s', url)
     return res
 
 
@@ -309,7 +309,7 @@ def search_url(obj, urls):
                 # Need to unescape html special characters
                 url = html.unescape(url)
                 if url is not None and is_valid(url):
-                    log.debug('URL found: {}'.format(url))
+                    log.debug('URL found: %s', url)
                     urls.add(url)
 
             search_url(v, urls)
@@ -324,14 +324,14 @@ def search_url(obj, urls):
 
 def extract_urls(filename, urls):
 
-    log.info('Checking links in file {} ...'.format(filename))
+    log.info('Checking links in file %s ...', filename)
 
     try:
         fp = open(filename, 'rb')
         parser = PDFParser(fp)
         doc = PDFDocument(parser)
     except Exception as e:
-        log.error("Cannot open file {}: {}\n".format(filename, e))
+        log.error("Cannot open file %s: %s\n", filename, e)
         return
 
     # Iterate through each object and search for URLs there
@@ -431,7 +431,7 @@ def main():
         url = options.check_url
         res, reason = check_url(url, options.timeout)
         if res is False:
-            log.error('URL {} failed. Reason: {}'.format(url, reason))
+            log.error('URL %s failed. Reason: %s', url, reason)
         sys.exit()
 
     if len(args) == 0:
@@ -492,14 +492,14 @@ def main():
     # Wait for all threads to complete
     for thread in threading.enumerate():
         log.info('Waiting for URL checks '
-                 'to complete: {} threads left'.
-                 format(threading.active_count()-1))
+                 'to complete: %d threads left',
+                 threading.active_count() - 1)
         if thread is not threading.current_thread():
                 thread.join()
 
     if len(errors) > 0:
         for url, reason in errors:
-            log.error('URL {} failed. Reason: {}'.format(url, reason))
+            log.error('URL %s failed. Reason: %s', url, reason)
         sys.exit(1)
 
     if options.status:
