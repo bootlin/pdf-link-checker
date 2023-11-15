@@ -10,7 +10,8 @@ Getting it running
 
 ::
 
-    pip install pdf-link-checker
+    pip install git+https://github.com/bootlin/pdf-link-checker.git
+    export PATH=$HOME/.local/bin:$PATH
     pdf-link-checker my-awesome-slides.pdf
 
 Options
